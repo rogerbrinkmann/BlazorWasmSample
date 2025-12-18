@@ -1,0 +1,38 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ] # This triggers the action whenever you push to the main branch
+
+jobs:
+  deploy-to-github-pages:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout the code from your repo
+      - uses: actions/checkout@v4
+
+      # 2. Setup the .NET 10 SDK
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview' # Ensures it finds the .NET 10 Preview/Daily builds
+
+      # 3. Publish the project to a folder named 'release'
+      - name: Publish app
+        run: dotnet publish -c Release -o release
+
+      # 4. Create the .nojekyll file to ensure GitHub doesn't ignore folders starting with '_'
+      - name: Add .nojekyll
+        run: touch release/wwwroot/.nojekyll
+
+      # 5. Copy index.html to 404.html to support SPA routing (direct links/refreshes)
+      - name: Create 404 page
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
+
+      # 6. Deploy the contents of 'release/wwwroot' to the 'gh-pages' branch
+      - name: Upload to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: release/wwwroot
+          branch: gh-pages # The action will create this branch automatically
