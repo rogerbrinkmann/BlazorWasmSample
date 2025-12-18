@@ -21,6 +21,7 @@ jobs:
       # 3. Publish the project to a folder named 'release'
       - name: Publish app
         run: |
+          dotnet clean BlazorWasmSample.csproj
           dotnet publish BlazorWasmSample.csproj -c Release -o release
 
       # 4. Create the .nojekyll file to ensure GitHub doesn't ignore folders starting with '_'
